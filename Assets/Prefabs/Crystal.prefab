@@ -30,7 +30,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
@@ -99,7 +99,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 20
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
@@ -172,10 +172,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _crystalPrefab: {fileID: 3637937823314173105}
+  _linkPrefab: {fileID: 7783975267999667592, guid: 419441fc685e5d447be231b333b8de77, type: 3}
   layerMask:
     serializedVersion: 2
     m_Bits: 1024
+  ConnectedCrystalsLinks: []
+  ConnectedCrystals: []
   _detectionRange: 3
-  _frequencity: 10
-  _distance: 2
-  _dampingRatio: 0
+  _frequencity: 7
+  _minDistance: 2
+  _dampingRatio: 0.5
