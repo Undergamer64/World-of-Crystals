@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
@@ -11,8 +12,17 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
     [SerializeField]
     private GameObject _linkPrefab;
 
+    [SerializeField] 
+    private bool _movable = true;
+
     [SerializeField]
-    private LayerMask layerMask;
+    private LayerMask _layerMask;
+
+    [SerializeField]
+    private Sprite _energyBallSprite;
+
+    [SerializeField]
+    private Sprite _crystalSprite;
 
     private List<Collider2D> _closeCrystals = new();
     public List<LinkScript> ConnectedCrystalsLinks = new();
@@ -40,6 +50,10 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
     public void OnPointerDown(PointerEventData eventData)
     {
+        if (!_movable)
+        {
+            return;
+        }
         _crystalRigidbody.simulated = false;
 
         //Delete links if theres any
@@ -51,6 +65,10 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (!_movable)
+        {
+            return;
+        }
         gameObject.transform.position = eventData.pointerCurrentRaycast.worldPosition;
         _crystalRigidbody.velocity = Vector2.zero;
 
@@ -59,7 +77,7 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (_crystalRigidbody == null)
+        if (_crystalRigidbody == null || !_movable)
         {
             return;
         }
@@ -75,7 +93,7 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         foreach (Collider2D crystalCollider in _closeCrystals)
         {
             GameObject otherCrystal = crystalCollider.gameObject;
-            if (otherCrystal == null || 1 << otherCrystal.layer != layerMask)
+            if (otherCrystal == null || 1 << otherCrystal.layer != _layerMask)
             {
                 continue;
             }
@@ -98,6 +116,10 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         }
 
         _closeCrystals.Clear();
+        transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        GetComponent<BoxCollider2D>().size = new Vector2(0.35f, 1);
+        gameObject.layer = 10;
+        GetComponent<SpriteRenderer>().sprite = _crystalSprite;
     }
 
     public bool CanConnect()
@@ -107,7 +129,7 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         foreach (Collider2D crystalCollider in _closeCrystals)
         {
             GameObject otherCrystal = crystalCollider.gameObject;
-            if (otherCrystal != null && 1 << otherCrystal.layer == layerMask)
+            if (otherCrystal != null && 1 << otherCrystal.layer == _layerMask)
             {
                 connectionNumber ++;
                 if (connectionNumber >= 2)
@@ -122,7 +144,7 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
     public void CheckLinks()
     {
-        _closeCrystals = Physics2D.OverlapCircleAll(gameObject.transform.position, _detectionRange, layerMask).ToList();
+        _closeCrystals = Physics2D.OverlapCircleAll(gameObject.transform.position, _detectionRange, _layerMask).ToList();
 
         if (CanConnect())
         {
@@ -140,6 +162,11 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
     public void DeleteAllLinks()
     {
+        gameObject.layer = 0;
+        GetComponent<SpriteRenderer>().sprite = _energyBallSprite;
+        transform.localScale = Vector3.one;
+        GetComponent<BoxCollider2D>().size = new Vector2(1, 1);
+
         List<SpringJoint2D> springJoint2Ds = GetComponents<SpringJoint2D>().ToList();
 
         ConnectedCrystalsLinks.Clear();

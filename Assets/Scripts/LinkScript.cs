@@ -13,11 +13,6 @@ public class LinkScript : MonoBehaviour
     public GameObject FirstCrystal() { return _firstCrystal; }
     public GameObject SecondCrystal() { return _secondCrystal; }
 
-    private float _detectionRange;
-
-    [SerializeField]
-    private float _minDistance = 1f;
-
     public void InitiatlizeLink(GameObject firstCrystal, GameObject secondCrystal, SpringJoint2D joint)
     {
         _firstCrystal = firstCrystal;
