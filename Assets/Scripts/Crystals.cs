@@ -25,11 +25,14 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
     private Sprite _crystalSprite;
 
     private List<Collider2D> _closeCrystals = new();
+    private List<Collider2D> _closeRedCrystals = new();
     public List<LinkScript> ConnectedCrystalsLinks = new();
     public List<SpringJoint2D> ConnectedCrystals = new();
 
     private Rigidbody2D _crystalRigidbody;
-
+    
+    [SerializeField]
+    private float _redCrystalDetectionRange = 3f;
 
     [SerializeField]
     private float _detectionRange = 3f;
@@ -119,6 +122,11 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
     public bool CanConnect()
     {
+        if (_closeRedCrystals.Count >= 1)
+        {
+            return false;
+        }
+
         int connectionNumber = 0;
 
         foreach (Collider2D crystalCollider in _closeCrystals)
@@ -163,7 +171,12 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
     public void CheckLinks()
     {
+        _closeCrystals.Clear();
+
+        _closeRedCrystals = Physics2D.OverlapCircleAll(gameObject.transform.position, _redCrystalDetectionRange, 1 << 12).ToList();
+
         _closeCrystals = Physics2D.OverlapCircleAll(gameObject.transform.position, _detectionRange, _layerMask).ToList();
+
 
         DeleteAllLinks();
 
