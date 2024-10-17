@@ -82,6 +82,10 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
             return;
         }
 
+        CheckLinks();
+
+        ConnectedCrystalsLinks.Clear();
+
         _crystalRigidbody.simulated = true;
         _crystalRigidbody.velocity = Vector2.zero;
 
@@ -99,16 +103,18 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
             }
 
             LinkScript link = Instantiate(_linkPrefab, transform).GetComponent<LinkScript>();
+
             SpringJoint2D joint = gameObject.AddComponent<SpringJoint2D>();
+            joint.connectedBody = otherCrystal.GetComponent<Rigidbody2D>();
+            joint.frequency = _frequencity;
+            joint.dampingRatio = _dampingRatio;
+
             link.InitiatlizeLink(gameObject, otherCrystal, joint);
 
             ConnectedCrystalsLinks.Add(link);
 
-            joint.connectedBody = otherCrystal.GetComponent<Rigidbody2D>();
             joint.autoConfigureDistance = false;
             joint.distance = Mathf.Clamp(joint.distance, _minDistance, _detectionRange);
-            joint.frequency = _frequencity;
-            joint.dampingRatio = _dampingRatio;
             joint.enableCollision = true;
 
             otherCrystal.GetComponent<Crystals>().ConnectedCrystals.Add(joint);
@@ -142,13 +148,18 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         return false;
     }
 
+    public void ShowPreview()
+    {
+
+    }
+
     public void CheckLinks()
     {
         _closeCrystals = Physics2D.OverlapCircleAll(gameObject.transform.position, _detectionRange, _layerMask).ToList();
 
         if (CanConnect())
         {
-            //ShowPreview();
+            ShowPreview();
         }
     }
     
