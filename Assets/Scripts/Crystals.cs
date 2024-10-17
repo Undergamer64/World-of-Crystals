@@ -69,7 +69,10 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         {
             return;
         }
-        gameObject.transform.position = eventData.pointerCurrentRaycast.worldPosition;
+        if (eventData.pointerCurrentRaycast.worldPosition != Vector3.zero)
+        {
+            gameObject.transform.position = eventData.pointerCurrentRaycast.worldPosition;
+        }
         _crystalRigidbody.velocity = Vector2.zero;
 
         CheckLinks();
@@ -84,8 +87,6 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
         CheckLinks();
 
-        ConnectedCrystalsLinks.Clear();
-
         _crystalRigidbody.simulated = true;
         _crystalRigidbody.velocity = Vector2.zero;
 
@@ -94,30 +95,18 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
             _closeCrystals.Clear();
             return;
         }
-        foreach (Collider2D crystalCollider in _closeCrystals)
+        foreach (LinkScript link in ConnectedCrystalsLinks)
         {
-            GameObject otherCrystal = crystalCollider.gameObject;
-            if (otherCrystal == null || 1 << otherCrystal.layer != _layerMask)
-            {
-                continue;
-            }
+            SpringJoint2D joint = link.Joint;
 
-            LinkScript link = Instantiate(_linkPrefab, transform).GetComponent<LinkScript>();
-
-            SpringJoint2D joint = gameObject.AddComponent<SpringJoint2D>();
-            joint.connectedBody = otherCrystal.GetComponent<Rigidbody2D>();
-            joint.frequency = _frequencity;
-            joint.dampingRatio = _dampingRatio;
-
-            link.InitiatlizeLink(gameObject, otherCrystal, joint);
-
-            ConnectedCrystalsLinks.Add(link);
-
+            joint.enabled = true;
+            link.GetComponent<LineRenderer>().startColor = Color.white;
+            link.GetComponent<LineRenderer>().endColor = Color.white;
             joint.autoConfigureDistance = false;
             joint.distance = Mathf.Clamp(joint.distance, _minDistance, _detectionRange);
             joint.enableCollision = true;
 
-            otherCrystal.GetComponent<Crystals>().ConnectedCrystals.Add(joint);
+            link.SecondCrystal().GetComponent<Crystals>().ConnectedCrystals.Add(joint);
             
         }
 
@@ -150,12 +139,33 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
     public void ShowPreview()
     {
+        foreach (Collider2D crystalCollider in _closeCrystals)
+        {
+            GameObject otherCrystal = crystalCollider.gameObject;
+            if (otherCrystal == null || 1 << otherCrystal.layer != _layerMask)
+            {
+                continue;
+            }
 
+            LinkScript link = Instantiate(_linkPrefab, transform).GetComponent<LinkScript>();
+            SpringJoint2D joint = gameObject.AddComponent<SpringJoint2D>();
+            link.InitiatlizeLink(gameObject, otherCrystal, joint);
+            joint.enabled = false;
+            joint.connectedBody = otherCrystal.GetComponent<Rigidbody2D>();
+            link.GetComponent<LineRenderer>().startColor = new Color(1, 1, 1, 0.25f);
+            link.GetComponent<LineRenderer>().endColor = new Color(1, 1, 1, 0.25f);
+            joint.frequency = _frequencity;
+            joint.dampingRatio = _dampingRatio;
+
+            ConnectedCrystalsLinks.Add(link);
+        }
     }
 
     public void CheckLinks()
     {
         _closeCrystals = Physics2D.OverlapCircleAll(gameObject.transform.position, _detectionRange, _layerMask).ToList();
+
+        DeleteAllLinks();
 
         if (CanConnect())
         {
@@ -178,15 +188,18 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         transform.localScale = Vector3.one;
         GetComponent<BoxCollider2D>().size = new Vector2(1, 1);
 
-        List<SpringJoint2D> springJoint2Ds = GetComponents<SpringJoint2D>().ToList();
-
         ConnectedCrystalsLinks.Clear();
         foreach (LinkScript link in GetComponentsInChildren<LinkScript>())
         {
             Destroy(link.gameObject);
         }
-        foreach (SpringJoint2D joint in springJoint2Ds)
+        foreach (SpringJoint2D joint in GetComponents<SpringJoint2D>().ToList())
         {
+            if (joint.connectedBody == null)
+            {
+                Destroy(joint);
+                continue;
+            }
             Crystals connectedCrystalScript = joint.connectedBody.GetComponent<Crystals>();
             connectedCrystalScript.ConnectedCrystals.Remove(joint);
             Destroy(joint);

@@ -27,6 +27,12 @@ public class LinkScript : MonoBehaviour
     void Update()
     {
         _lineRenderer.SetPosition(0, _firstCrystal.transform.position);
+        if (_secondCrystal == null)
+        {
+            Destroy(Joint);
+            Destroy(gameObject);
+            return;
+        }
         _lineRenderer.SetPosition(1, _secondCrystal.transform.position);
     }
 }
