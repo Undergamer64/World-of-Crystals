@@ -181,8 +181,8 @@ MonoBehaviour:
   _crystalSprite: {fileID: 21300000, guid: 7ce9971b56af06740b34b202cfe17ac4, type: 3}
   ConnectedCrystalsLinks: []
   ConnectedCrystals: []
-  _redCrystalDetectionRange: 1
+  _redCrystalDetectionRange: 0.5
   _detectionRange: 3
   _frequencity: 7
-  _minDistance: 2
+  _minDistance: 1.5
   _dampingRatio: 0.5

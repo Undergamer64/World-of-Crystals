@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPointerUpHandler
 {
@@ -64,6 +63,9 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
         //Checks for links and show them
         CheckLinks();
+        transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        GetComponent<SpriteRenderer>().sprite = _crystalSprite;
+        GetComponent<BoxCollider2D>().size = new Vector2(0.3f, 0.9f);
     }
 
     public void OnDrag(PointerEventData eventData)
@@ -79,6 +81,9 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
         _crystalRigidbody.velocity = Vector2.zero;
 
         CheckLinks();
+        transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        GetComponent<SpriteRenderer>().sprite = _crystalSprite;
+        GetComponent<BoxCollider2D>().size = new Vector2(0.3f, 0.9f);
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -115,9 +120,9 @@ public class Crystals : MonoBehaviour, IPointerDownHandler, IDragHandler, IPoint
 
         _closeCrystals.Clear();
         transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
-        GetComponent<BoxCollider2D>().size = new Vector2(0.35f, 1);
         gameObject.layer = 10;
         GetComponent<SpriteRenderer>().sprite = _crystalSprite;
+        GetComponent<BoxCollider2D>().size = new Vector2(0.3f, 0.9f);
     }
 
     public bool CanConnect()

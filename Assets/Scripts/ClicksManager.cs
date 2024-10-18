@@ -4,10 +4,18 @@ using UnityEngine.EventSystems;
 public class ClicksManager : MonoBehaviour, IPointerDownHandler
 {
     [SerializeField]
+    private bool _enabled = true;
+
+    [SerializeField]
     private GameObject _crystalPrefab;
 
     [SerializeField]
     private Transform _crystalsParent;
+
+    private void Awake()
+    {
+        this.enabled = _enabled;
+    }
 
     public void OnPointerDown(PointerEventData eventData)
     {

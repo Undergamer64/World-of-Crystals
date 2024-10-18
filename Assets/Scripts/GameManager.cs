@@ -1,11 +1,20 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    private IEnumerator _endGameCoroutine;
+    [SerializeField]
+    private GameObject _timerText;
+
+    [SerializeField]
+    private GameObject _finishedGame;
+
+    private bool _isTimerActive = false;
+    private float _timer = 5f;
 
     private void Awake()
     {
@@ -19,37 +28,59 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void EndLevel()
+    public void ReloadScene()
     {
-        if (_endGameCoroutine != null)
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void MainMenu()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.R))
         {
+            ReloadScene();
+        }
+
+        _timerText.SetActive(_isTimerActive);
+        if (!_isTimerActive)
+        {
+            _timer = 5;
+            _timerText.SetActive(false);
             return;
         }
-        Debug.Log("Started the timer");
-        _endGameCoroutine = EndLevelCoroutine(5f);
-        StartCoroutine(_endGameCoroutine);
+        _timer -= Time.deltaTime;
+        _timerText.GetComponent<TextMeshProUGUI>().text = ((int)_timer+1).ToString();
+        if (_timer <= 0)
+        {
+            NextLevel();
+        }
+    }
+
+    public void EndLevel()
+    {
+        _isTimerActive = true; 
+        _timerText.SetActive(_isTimerActive);
     }
 
     public void CancelEndLevel()
     {
-        if (_endGameCoroutine == null)
+        _isTimerActive = false;
+    }
+
+    private void NextLevel()
+    {
+        if (SceneManager.GetActiveScene().buildIndex < 3)
         {
-            return;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
         }
-        StopCoroutine(_endGameCoroutine);
-        _endGameCoroutine = null;
-        Debug.Log("Stopped the timer");
-    }
-
-    private IEnumerator EndLevelCoroutine(float time)
-    {
-        yield return new WaitForSeconds(time);
-        Test();
-    }
-
-    private void Test()
-    {
-        Debug.Log("End");
-        _endGameCoroutine = null;
+        else
+        {
+            _finishedGame.SetActive(true);
+            _isTimerActive = false;
+        }
     }
 }
